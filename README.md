@@ -76,4 +76,22 @@ sudo mount -o noatime /dev/ubuntu-vg/data /data
 
 # 5. Persist in fstab
 echo '/dev/ubuntu-vg/data /data ext4 defaults,noatime 0 2' | sudo tee -a /etc/fstab
+
+sudo chown -R jesse:jesse /data
+```
+
+# Install DeepSeek-V3-0324
+```bash
+sudo apt update
+sudo apt install git-lfs
+git lfs install
+cd /data
+git lfs clone https://huggingface.co/deepseek-ai/DeepSeek-V3-0324 DeepSeek-V3-0324
+```
+
+# Run DeepSeek-V3-0324
+```bash
+cd DeepSeek-V3-0324
+ollama import model.yml
+ollama run DeepSeek-V3-0324
 ```
