@@ -78,6 +78,51 @@ sudo mount -o noatime /dev/ubuntu-vg/data /data
 echo '/dev/ubuntu-vg/data /data ext4 defaults,noatime 0 2' | sudo tee -a /etc/fstab
 
 sudo chown -R jesse:jesse /data
+cd /data
+```
+
+
+# move ollama data dir
+```bash
+mkdir -p /data/ollama/models
+sudo chown ollama:ollama /data/ollama/models
+sudo systemctl edit ollama.service
+```
+
+Add these lines:
+
+```
+[Service]
+Environment="OLLAMA_MODELS=/data/ollama/models"
+```
+
+`CTRL+O`
+`CTRL+X`
+
+Restart ollama daemon:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart ollama
+```
+
+Check the logs and status to make sure it worked:
+```bash
+systemctl status ollama.service
+sudo journalctl -u ollama.service
+```
+
+# Run Deepseek V3
+This is a super long download, even on fiber, so use `screen`! That way,
+if your SSH session times out, your download continues in the background.
+```bash
+screen
+ollama run  deepseek-v3:671b-q8_0
+```
+
+If you need to resume the ssh session later:
+```bash
+ssh jesse@larry
+screen -x
 ```
 
 # Install DeepSeek-V3-0324
@@ -85,7 +130,6 @@ sudo chown -R jesse:jesse /data
 sudo apt update
 sudo apt install git-lfs
 git lfs install
-cd /data
 ```
 
 This is a super long download, even on fiber, so use `screen`! That way,
@@ -107,3 +151,4 @@ cd DeepSeek-V3-0324
 ollama import model.yml
 ollama run DeepSeek-V3-0324
 ```
+
