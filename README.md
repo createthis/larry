@@ -86,7 +86,19 @@ sudo apt update
 sudo apt install git-lfs
 git lfs install
 cd /data
+```
+
+This is a super long download, even on fiber, so use `screen`! That way,
+if your SSH session times out, your download continues in the background.
+```bash
+screen
 git lfs clone https://huggingface.co/deepseek-ai/DeepSeek-V3-0324 DeepSeek-V3-0324
+```
+
+If you need to resume the ssh session later:
+```bash
+ssh jesse@larry
+screen -x
 ```
 
 # Run DeepSeek-V3-0324
