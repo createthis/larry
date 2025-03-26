@@ -62,8 +62,8 @@ curl -fsSL https://ollama.com/install.sh | sh
 
 # create /data partition
 ```bash
-# 1. Create a new 2TB LV named 'data'
-sudo lvcreate -L 2T -n data ubuntu-vg
+# 1. Create a new LV named 'data' using 100% of the available space
+sudo lvcreate -l 100%FREE -n data ubuntu-vg
 
 # 2. Format it as ext4 (using journaling is optional; here we keep defaults)
 sudo mkfs.ext4 /dev/ubuntu-vg/data
