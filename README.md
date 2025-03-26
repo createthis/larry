@@ -59,3 +59,21 @@ ssh jesse@larry
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
+
+# create /data partition
+```bash
+# 1. Create a new 2TB LV named 'data'
+sudo lvcreate -L 2T -n data ubuntu-vg
+
+# 2. Format it as ext4 (using journaling is optional; here we keep defaults)
+sudo mkfs.ext4 /dev/ubuntu-vg/data
+
+# 3. Create the mount point
+sudo mkdir /data
+
+# 4. Mount with noatime for performance
+sudo mount -o noatime /dev/ubuntu-vg/data /data
+
+# 5. Persist in fstab
+echo '/dev/ubuntu-vg/data /data ext4 defaults,noatime 0 2' | sudo tee -a /etc/fstab
+```
