@@ -97,6 +97,7 @@ Environment="OLLAMA_MODELS=/data/ollama/models"
 Environment="OLLAMA_KEEP_ALIVE=-1"
 Environment="OLLAMA_HOST=0.0.0.0"
 Environment="OLLAMA_NUM_PARALLEL=1"
+Environment="OLLAMA_CONTEXT_LENGTH=16384"
 ```
 
 `CTRL+O`
