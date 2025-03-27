@@ -126,58 +126,8 @@ ssh jesse@larry
 screen -x
 ```
 
-# Install DeepSeek-V3-0324
-```bash
-sudo apt update
-sudo apt install git-lfs
-git lfs install
-```
-
-This is a super long download, even on fiber, so use `screen`! That way,
-if your SSH session times out, your download continues in the background.
-```bash
-screen
-git lfs clone https://huggingface.co/deepseek-ai/DeepSeek-V3-0324 DeepSeek-V3-0324
-```
-
-If you need to resume the ssh session later:
-```bash
-ssh jesse@larry
-screen -x
-```
-
 # Run DeepSeek-V3-0324
 ```bash
-cd DeepSeek-V3-0324
-vim Modelfile
+screen
+ollama run --verbose lordoliver/DeepSeek-V3-0324:671b-q8_0
 ```
-
-Paste this in:
-
-```Modelfile
-FROM /data/DeepSeek-V3-0324
-TEMPLATE """{{- range $i, $_ := .Messages }}
-{{- if eq .Role "user" }}<｜User｜>
-{{- else if eq .Role "assistant" }}<｜Assistant｜>
-{{- end }}{{ .Content }}
-{{- if eq (len (slice $.Messages $i)) 1 }}
-{{- if eq .Role "user" }}<｜Assistant｜>
-{{- end }}
-{{- else if eq .Role "assistant" }}<｜end▁of▁sentence｜><｜begin▁of▁sentence｜>
-{{- end }}
-{{- end }}"""
-PARAMETER stop <｜begin▁of▁sentence｜>
-PARAMETER stop <｜end▁of▁sentence｜>
-PARAMETER stop <｜User｜>
-PARAMETER stop <｜Assistant｜>
-```
-
-Then create the model:
-```bash
-time ollama create \
-  -f Modelfile DeepSeek-V3-0324
-```
-```bash
-ollama run --verbose DeepSeek-V3-0324
-```
-
