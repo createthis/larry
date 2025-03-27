@@ -131,3 +131,21 @@ screen -x
 screen
 ollama run --verbose lordoliver/DeepSeek-V3-0324:671b-q8_0
 ```
+
+This version talks about youtube scripts unprompted, so I think the `Modelfile` must include a custom prompt.
+Let's remove it (only works if you also have `deepseek-v3:671b-q8_0` downloaded):
+
+```bash
+ollama stop lordoliver/DeepSeek-V3-0324:671b-q8_0
+mkdir /data/DeepSeek-V3-0324
+cd /data/DeepSeek-V3-0324
+ollama show deepseek-v3:671b-q8_0 --modelfile > Modelfile.deepseek
+ollama show lordoliver/DeepSeek-V3-0324:671b-q8_0 --modelfile > Modelfile.old
+cp Modelfile.deepseek Modelfile
+vim Modelfile.old
+# copy the FROM line then open Modelfile in a new vim tab
+tabe Modelfile
+# paste the FROM line from Modelfile.old into Modelfile
+ollama create DeepSeek-V3-0324:671b-q8_0 -f ./Modelfile
+ollama run DeepSeek-V3-0324:671b-q8_0
+```
