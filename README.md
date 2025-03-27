@@ -94,6 +94,7 @@ Add these lines:
 ```
 [Service]
 Environment="OLLAMA_MODELS=/data/ollama/models"
+Environment="OLLAMA_KEEP_ALIVE=-1"
 ```
 
 `CTRL+O`
@@ -116,7 +117,7 @@ This is a super long download, even on fiber, so use `screen`! That way,
 if your SSH session times out, your download continues in the background.
 ```bash
 screen
-ollama run  deepseek-v3:671b-q8_0
+ollama run --verbose deepseek-v3:671b-q8_0
 ```
 
 If you need to resume the ssh session later:
@@ -148,7 +149,35 @@ screen -x
 # Run DeepSeek-V3-0324
 ```bash
 cd DeepSeek-V3-0324
-ollama import model.yml
-ollama run DeepSeek-V3-0324
+vim Modelfile
+```
+
+Paste this in:
+
+```Modelfile
+FROM /data/DeepSeek-V3-0324
+TEMPLATE """{{- range $i, $_ := .Messages }}
+{{- if eq .Role "user" }}<｜User｜>
+{{- else if eq .Role "assistant" }}<｜Assistant｜>
+{{- end }}{{ .Content }}
+{{- if eq (len (slice $.Messages $i)) 1 }}
+{{- if eq .Role "user" }}<｜Assistant｜>
+{{- end }}
+{{- else if eq .Role "assistant" }}<｜end▁of▁sentence｜><｜begin▁of▁sentence｜>
+{{- end }}
+{{- end }}"""
+PARAMETER stop <｜begin▁of▁sentence｜>
+PARAMETER stop <｜end▁of▁sentence｜>
+PARAMETER stop <｜User｜>
+PARAMETER stop <｜Assistant｜>
+```
+
+Then create the model:
+```bash
+time ollama create \
+  -f Modelfile DeepSeek-V3-0324
+```
+```bash
+ollama run --verbose DeepSeek-V3-0324
 ```
 
