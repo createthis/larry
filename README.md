@@ -89,12 +89,14 @@ sudo chown ollama:ollama /data/ollama/models
 sudo systemctl edit ollama.service
 ```
 
-Add these lines:
+Add these lines (note this will expose the ollama API to your local network, so make sure you're secure first):
 
 ```
 [Service]
 Environment="OLLAMA_MODELS=/data/ollama/models"
 Environment="OLLAMA_KEEP_ALIVE=-1"
+Environment="OLLAMA_HOST=0.0.0.0"
+Environment="OLLAMA_NUM_PARALLEL=1"
 ```
 
 `CTRL+O`
@@ -149,3 +151,27 @@ tabe Modelfile
 ollama create DeepSeek-V3-0324:671b-q8_0 -f ./Modelfile
 ollama run DeepSeek-V3-0324:671b-q8_0
 ```
+
+# Run Open WebUI
+On a different machine (laptop, workstation, whatever), install Docker Desktop, then run this:
+
+```bash
+docker run -d -p 3000:8080 -e OLLAMA_BASE_URL=http://larry:11434/ \
+-v open-webui:/app/backend/data --name open-webui --restart always \
+ghcr.io/open-webui/open-webui:main
+```
+
+On the same machine, in a browser, visit `http://localhost:3000/`.
+
+In the chat, set the context window size to `16384`. Larger than that will exceed the 768G of RAM.
+The first time I did this I forgot to add `Environment="OLLAMA_NUM_PARALLEL=1"` to my service config (see above)
+and I got this error in the ollama service log:
+
+```
+ level=INFO source=server.go:105 msg="system memory" total="755.0 GiB" free="739.0 GiB" free_swap="7.9 GiB"
+ level=WARN source=ggml.go:149 msg="key not found" key=deepseek2.vision.block_count default=0
+ level=WARN source=server.go:133 msg="model request too large for system" requested="996.3 GiB" available=802049822720 total="755.0 GiB" free="739.0 GiB" swap="7.9 GiB"
+ level=INFO source=sched.go:429 msg="NewLlamaServer failed" model=/data/ollama/models/blobs/sha256-e0edc8061214ae9dc247ba72e7995806287d0d6ac66a7807b65249f07db8a081 error="model requires more system memory (996.3 GiB) than is available (747.0 GiB)"
+```
+
+So apparently 1TB of RAM would buy you either 4x 16k context windows, **OR** a single 65k context window.
