@@ -4,7 +4,7 @@
 AMD CBS -> DF Common Options -> Memory Addressing -> NUMA Nodes per socket -> NPS0
 
 ## 5600mhz ram
-BIOS > AMD CBS > SMU Common Options > Enforce POR > Accept > Memory Target Speed > Change
+BIOS > AMD CBS > UMC Common Options > Enforce POR > Accept > Memory Target Speed > Change
 
 # Getting started
 Once Ubuntu `24.04.2` is installed:
