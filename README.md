@@ -63,6 +63,40 @@ Attempt login:
 ssh jesse@larry
 ```
 
+# install tuned
+Let's set the performance CPU profile from AMD.
+```bash
+sudo apt install tuned
+tuned-adm active
+sudo tuned-adm profile throughput-performance
+tuned-adm active
+```
+
+Now let's make sure that happens at system boot:
+```bash
+sudo vim /etc/systemd/system/tuned-adm.service
+```
+
+Paste this file:
+```ini
+[Unit]
+Description=Set tuned profile to throughput-performance
+After=tuned.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/tuned-adm profile throughput-performance
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Then enable the service:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable tuned-adm.service
+```
+
 # install ollama
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
@@ -108,6 +142,8 @@ Environment="OLLAMA_NUM_PARALLEL=1"
 Environment="OLLAMA_CONTEXT_LENGTH=16384"
 ```
 
+Use `16384` for Deepseek-V3 671b q8. Use `65536` for q4.
+
 `CTRL+O`
 `CTRL+X`
 
@@ -123,7 +159,7 @@ systemctl status ollama.service
 sudo journalctl -u ollama.service
 ```
 
-# Run Deepseek V3
+# Run Deepseek V3 Q8
 This is a super long download, even on fiber, so use `screen`! That way,
 if your SSH session times out, your download continues in the background.
 ```bash
@@ -183,4 +219,4 @@ and I got this error in the ollama service log:
  level=INFO source=sched.go:429 msg="NewLlamaServer failed" model=/data/ollama/models/blobs/sha256-e0edc8061214ae9dc247ba72e7995806287d0d6ac66a7807b65249f07db8a081 error="model requires more system memory (996.3 GiB) than is available (747.0 GiB)"
 ```
 
-So apparently 1TB of RAM would buy you either 4x 16k context windows, **OR** a single 65k context window.
+So apparently 1TB of RAM would buy you either 4x 16k context windows, **OR** a single 64k context window.
