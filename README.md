@@ -140,6 +140,8 @@ Environment="OLLAMA_KEEP_ALIVE=-1"
 Environment="OLLAMA_HOST=0.0.0.0"
 Environment="OLLAMA_NUM_PARALLEL=1"
 Environment="OLLAMA_CONTEXT_LENGTH=16384"
+LimitNOFILE=65536
+LimitNPROC=65536
 ```
 
 Use `16384` for Deepseek-V3 671b q8. Use `65536` for q4.
