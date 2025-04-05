@@ -222,3 +222,58 @@ and I got this error in the ollama service log:
 ```
 
 So apparently 1TB of RAM would buy you either 4x 16k context windows, **OR** a single 64k context window.
+
+
+# ktransformers
+
+## v0.2.4post1
+follow https://github.com/kvcache-ai/ktransformers/blob/main/doc/en/balance-serve.md#installation-guide change the conda env name from `ktransformers` to `ktransformers_mc`
+
+```bash
+cd ktransformers/ktransformers
+conda activate ktransformers_mc
+export CUDA_HOME=/usr/local/cuda
+export TORCH_CUDA_ARCH_LIST="8.6"
+```
+
+**128k context window!**
+
+```bash
+# context length 131072
+python ktransformers/server/main.py \
+  --port 11434 \
+  --model_path deepseek-ai/DeepSeek-V3-0324 \
+  --model_name "DeepSeek-V3-0324:671b-q4_k_m" \
+  --gguf_path /data/DeepSeek-V3-0324/q4_files/Q4_K_M \
+  --temperature 0.3 \
+  --max_new_tokens 1024 \
+  --cache_lens 131072 \
+  --chunk_size 256 \
+  --backend_type ktransformers
+```
+
+## Open Hands AI
+
+Set `WORKSPACE_BASE` to whichever local directory you want the AI to have access to. This is your project root.
+
+```bash
+export WORKSPACE_BASE=/Users/jesse/Documents/CreateThis.com/Personal/bjj_calculate_match_difficulty_js
+```
+
+Then run open hands
+
+```bash
+docker run -it --rm --pull=always \
+    -v DEBUG=1 \
+    -e SANDBOX_USER_ID=$(id -u) \
+    -e WORKSPACE_MOUNT_PATH=$WORKSPACE_BASE \
+    -e LOG_ALL_EVENTS=true \
+    -v $WORKSPACE_BASE:/opt/workspace_base \
+    -e SANDBOX_RUNTIME_CONTAINER_IMAGE=docker.all-hands.dev/all-hands-ai/runtime:0.31.0-nikolaik \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v ~/.openhands-state:/.openhands-state \
+    -p 3000:3000 \
+    --add-host host.docker.internal:host-gateway \
+    --name openhands-app \
+    docker.all-hands.dev/all-hands-ai/openhands:0.31.0
+```
