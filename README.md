@@ -256,6 +256,45 @@ python ktransformers/server/main.py \
   --backend_type ktransformers
 ```
 
+## balance_serve
+In order to start with `balance_serve`, you need to create a new folder and populate it with the small files
+from the model:
+
+```bash
+mkdir /data/DeepSeek-V3
+cd /data/DeepSeek-V3
+wget https://huggingface.co/deepseek-ai/DeepSeek-V3-0324/raw/main/LICENSE
+wget https://huggingface.co/deepseek-ai/DeepSeek-V3-0324/raw/main/README.md
+wget https://huggingface.co/deepseek-ai/DeepSeek-V3-0324/raw/main/config.json
+wget https://huggingface.co/deepseek-ai/DeepSeek-V3-0324/raw/main/configuration_deepseek.py
+wget https://huggingface.co/deepseek-ai/DeepSeek-V3-0324/raw/main/model.safetensors.index.json
+wget https://huggingface.co/deepseek-ai/DeepSeek-V3-0324/raw/main/modeling_deepseek.py
+wget https://huggingface.co/deepseek-ai/DeepSeek-V3-0324/raw/main/tokenizer.json
+wget https://huggingface.co/deepseek-ai/DeepSeek-V3-0324/raw/main/tokenizer_config.json
+cd -
+```
+
+Now you can run it manually:
+
+```bash
+conda activate ktransformers_mc26
+export CUDA_HOME=/usr/local/cuda
+export TORCH_CUDA_ARCH_LIST="8.6"
+
+python ktransformers/server/main.py \
+  --port 11434 \
+  --model_path /data/DeepSeek-V3 \
+  --model_name "DeepSeek-V3-0324:671b-q4_k_m" \
+  --gguf_path /data/DeepSeek-V3-0324/q4_files/Q4_K_M \
+  --optimize_config_path ktransformers/optimize/optimize_rules/DeepSeek-V3-Chat-serve.yaml \
+  --max_new_tokens 1024 \
+  --cache_lens 131072 \
+  --chunk_size 256 \
+  --max_batch_size 4 \
+  --temperature 0.3 \
+  --backend_type balance_serve
+```
+
 ## Setup systemd ktransformers.service
 
 Once the above is working, if you would prefer to have ktransformers start at boot, do this:
