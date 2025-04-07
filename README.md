@@ -275,16 +275,19 @@ User=jesse
 WorkingDirectory=/home/jesse/ktransformers/ktransformers
 Environment="CUDA_HOME=/usr/local/cuda"
 Environment="TORCH_CUDA_ARCH_LIST=8.6"
-ExecStart=/home/jesse/anaconda3/envs/ktransformers_mc26/bin/python ktransformers/server/main.py \
+ExecStart=bash -c 'source /home/jesse/anaconda3/bin/activate ktransformers_mc26; \
+/home/jesse/anaconda3/envs/ktransformers_mc26/bin/python ktransformers/server/main.py \
   --port 11434 \
-  --model_path deepseek-ai/DeepSeek-V3-0324 \
+  --model_path /data/DeepSeek-V3 \
   --model_name "DeepSeek-V3-0324:671b-q4_k_m" \
   --gguf_path /data/DeepSeek-V3-0324/q4_files/Q4_K_M \
-  --temperature 0.3 \
+  --optimize_config_path ktransformers/optimize/optimize_rules/DeepSeek-V3-Chat-serve.yaml \
   --max_new_tokens 1024 \
   --cache_lens 131072 \
   --chunk_size 256 \
-  --backend_type ktransformers
+  --max_batch_size 4 \
+  --temperature 0.3 \
+  --backend_type balance_serve'
 Restart=on-failure
 TimeoutStartSec=600
 
