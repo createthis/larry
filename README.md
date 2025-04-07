@@ -229,9 +229,13 @@ So apparently 1TB of RAM would buy you either 4x 16k context windows, **OR** a s
 ## v0.2.4post1
 follow https://github.com/kvcache-ai/ktransformers/blob/main/doc/en/balance-serve.md#installation-guide change the conda env name from `ktransformers` to `ktransformers_mc`
 
+## Manual start
+
+Do this while evaluating the system:
+
 ```bash
 cd ktransformers/ktransformers
-conda activate ktransformers_mc
+conda activate ktransformers_mc26
 export CUDA_HOME=/usr/local/cuda
 export TORCH_CUDA_ARCH_LIST="8.6"
 ```
@@ -250,6 +254,54 @@ python ktransformers/server/main.py \
   --cache_lens 131072 \
   --chunk_size 256 \
   --backend_type ktransformers
+```
+
+## Setup systemd ktransformers.service
+
+Once the above is working, if you would prefer to have ktransformers start at boot, do this:
+
+```bash
+sudo vim /etc/systemd/system/ktransformers.service
+```
+
+You'll need to replace `jesse` with your user:
+```systemd
+[Unit]
+Description=KTransformers Server
+After=network.target
+
+[Service]
+User=jesse
+WorkingDirectory=/home/jesse/ktransformers/ktransformers
+Environment="CUDA_HOME=/usr/local/cuda"
+Environment="TORCH_CUDA_ARCH_LIST=8.6"
+ExecStart=/home/jesse/anaconda3/envs/ktransformers_mc26/bin/python ktransformers/server/main.py \
+  --port 11434 \
+  --model_path deepseek-ai/DeepSeek-V3-0324 \
+  --model_name "DeepSeek-V3-0324:671b-q4_k_m" \
+  --gguf_path /data/DeepSeek-V3-0324/q4_files/Q4_K_M \
+  --temperature 0.3 \
+  --max_new_tokens 1024 \
+  --cache_lens 131072 \
+  --chunk_size 256 \
+  --backend_type ktransformers
+Restart=on-failure
+TimeoutStartSec=600
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable the service at boot and start it:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable ktransformers
+sudo systemctl start ktransformers
+```
+
+If you want to watch it start:
+```bash
+sudo journalctl -u ktransformers.service -f
 ```
 
 ## Open Hands AI
